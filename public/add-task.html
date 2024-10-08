@@ -1,0 +1,176 @@
+<!-- public/add-task.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Task - Office To-Do List</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button {
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 16px;
+            display: none;
+        }
+
+        .message.success {
+            color: #28a745;
+        }
+
+        .message.error {
+            color: #dc3545;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Task</h1>
+        <form id="add-task-form">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
+            <div>
+                <label for="work">Work Description</label>
+                <textarea id="work" name="work" rows="4" placeholder="Enter task description" required></textarea>
+            </div>
+            <div>
+                <label for="assign_date">Assign Date</label>
+                <input type="date" id="assign_date" name="assign_date" required>
+            </div>
+            <div>
+                <label for="due_date">Due Date</label>
+                <input type="date" id="due_date" name="due_date" required>
+            </div>
+            <button type="submit">Add Task</button>
+        </form>
+        <div id="message" class="message"></div>
+        <div class="link">
+            <a href="show-tasks.html">View Task List</a>
+        </div>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('add-task-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const work = document.getElementById('work').value.trim();
+            const assign_date = document.getElementById('assign_date').value;
+            const due_date = document.getElementById('due_date').value;
+
+            const messageDiv = document.getElementById('message');
+
+            if (!name || !work || !assign_date || !due_date) {
+                messageDiv.textContent = 'Please fill out all fields.';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            // Send POST request to add-task endpoint
+            fetch('/add-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, work, assign_date, due_date }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Task added successfully!') {
+                    messageDiv.textContent = data.message;
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    // Clear the form
+                    document.getElementById('add-task-form').reset();
+                } else {
+                    messageDiv.textContent = data.message || 'Error adding task.';
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.textContent = 'Error adding task. Please try again.';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
